@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>VC Prototype</title>
+		<meta name="author" content="amishkin">
+		<!-- Load Style Sheets -->
+		<link rel="stylesheet" href="resources/styles/main.css">
+		<link rel="stylesheet" href="vendors/bootstrap/dist/css/bootstrap.css">
+	</head>
+	<body>
+		<form>
+			<div class="form-group col-sm-6">
+				<label for="URI-input">Data URI</label>
+				<input type="text" class="form-control" id="URI-input">
+			</div>
+			<button type='button' class="btn btn-large btn-success" id="update-graph-button">Update Graph</button>
+		</form>
+		<div id="main-chart">
+			<svg id="chart" class="chart"></svg>
+		</div>
+				<!-- Load Plugins and Libraries -->
+		<script src="vendors/jquery/dist/jquery.js"></script>
+		<script src="vendors/d3/d3.js"></script>
+				<!-- Load Scripts (in correct order)-->
+		<script src="resources/scripts/ValueChart.js"></script>
+		<script src="resources/scripts/main.js"></script>
+	</body>
+</html>

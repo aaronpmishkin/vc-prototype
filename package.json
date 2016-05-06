@@ -1,0 +1,15 @@
+{
+  "name": "vc-web",
+  "version": "1.0.0",
+  "description": "Web Application for ValueCharts",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "amishkin",
+  "license": "ISC",
+  "devDependencies": {
+    "browser-sync": "^2.12.5",
+    "gulp": "^3.9.1"
+  }
+}
