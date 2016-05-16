@@ -2,7 +2,7 @@
 * @Author: aaronmishkin
 * @Date:   2016-05-05 14:14:04
 * @Last Modified by:   aaronpmishkin
-* @Last Modified time: 2016-05-09 16:56:06
+* @Last Modified time: 2016-05-11 12:38:26
 */
 
 function ValueChart(dataLocation) {
@@ -80,6 +80,30 @@ ValueChart.prototype.plotChart = function() {
 			})
 			.style('fill', function(d, i) { return _this.color(i); });
 
+	var resizeBoxes = this.utilityBars.append('g')
+		.append('rect')
+			.attr('width', 200)
+			.attr('height', 80)
+			.attr('x', -5)
+			.style('fill-opacity', 0)
+			.style('stroke', 'red');
+
+	resizeBoxes.call(d3.behavior.drag().on('drag', function(d, i) {
+		console.log(d, i);
+		
+		console.log(d3.event.x, d3.event.y);
+
+		d.forEach(function(element) { element.y = element.y + 10 });
+
+		_this.data[0] = d;
+
+		_this.utilityBars.data(_this.data)
+			.selectAll('.utilityGraphs')
+				.selectAll('rect')
+					.attr('height', function(d) { return _this.yScale(d.y); })
+					.attr('y', function(d) { return _this.configuration.objectiveSpacing - _this.yScale(d.y); })
+
+	}))
 
 	this.plotStackBarChart();
 	this.plotIndividualAlternatives();
@@ -90,16 +114,18 @@ ValueChart.prototype.plotIndividualAlternatives = function() {
 
 	var yMax = d3.max(this.data, function(layer) { return d3.max(layer, function(d) { return d.y; }); });
 
-	var yScale = d3.scale.linear()
+	this.yScale = d3.scale.linear()
     	.domain([0, yMax])
     	.range([0, yMax * 3]);
 
-	this.utilityBars.selectAll('rect')
+	this.utilityBars.append('g')
+		.attr('class', 'utilityGraphs')
+		.selectAll('rect')
 		.data(function(d) { return d; })
 		.enter().append('rect')
-			.attr('height', function(d) { return yScale(d.y); })
+			.attr('height', function(d) { return _this.yScale(d.y); })
 			.attr('width', this.configuration.barWidth - 1)
-			.attr('y', function(d) { return _this.configuration.objectiveSpacing - yScale(d.y); })
+			.attr('y', function(d) { return _this.configuration.objectiveSpacing - _this.yScale(d.y); })
 			.attr('x', function(d, i) { return (i * _this.configuration.barWidth); });
 
 	this.utilityCharts.selectAll('text')
