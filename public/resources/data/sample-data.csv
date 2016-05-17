@@ -1,9 +1,9 @@
 alternative,location,rate,internet,room size,television, shower
-Sheraton,10,5,10,15,13,5
-Best Western,10,0,8,10,8,5
-Hyatt,20,2,4,20,4,5
-Marriott,0,0,8,10,10,0
-Holiday Inn,0,2,0,5,10,5
-Ramada,20,4,5,5,4,5
-Coast,20,9,10,10,10,0
-Templeton,10,11,12,14,9,5
+Sheraton,1,.5,1,.8,.9,.5
+Best Western,1,0,.8,.2,.8,.5
+Hyatt,1,.2,.4,.9,.4,.5
+Marriott,0,0,.8,1,1,0
+Holiday Inn,0,.2,0,.5,.8,.5
+Ramada,1,.4,.5,.5,.4,.3
+Coast,1,.4,.5,.5,.5,0
+Templeton,.1,.1,.1,.1,.9,.5
