@@ -16,7 +16,7 @@ cd to the directory that the repo was cloned to. Then:
   
   gulp serve
   
-Note that you must have node and npm installed globally on your machine, as well as bower. If you done have bower installed, then:
+Note that you must have node and npm installed globally on your machine, as well as bower. If you don't have bower installed, then:
 
   npm install bower -g
   
