@@ -2,7 +2,7 @@
 * @Author: aaronmishkin
 * @Date:   2016-05-05 14:14:04
 * @Last Modified by:   aaronpmishkin
-* @Last Modified time: 2016-05-16 21:43:21
+* @Last Modified time: 2016-05-17 09:50:39
 */
 
 function ValueChart(dataLocation) {
@@ -45,7 +45,7 @@ function ValueChart(dataLocation) {
 
 				var initWeight = 1 / 6;
 
-				return {x: rowIndex, y: +row[colIndex], lineY: 0, weight: initWeight}; 
+				return {x: rowIndex, y: +row[colIndex] * initWeight, lineY: 0, weight: initWeight, value: +row[colIndex]}; 
 			})
 		});
 
@@ -79,7 +79,7 @@ ValueChart.prototype.plotChart = function() {
 		.attr('height', this.configuration.chartHeight);
 
 	this.stackedBarChart = this.graphSpace.append('g')
-		.attr('transform', 'translate(' + (this.configuration.chartWidth / 5) + ', 280)');
+		.attr('transform', 'translate(' + (this.configuration.chartWidth / 5) + '-60)');
 
 	this.utilityCharts = this.graphSpace.append('g')
 		
@@ -91,8 +91,8 @@ ValueChart.prototype.plotChart = function() {
 			})
 			.style('fill', function(d, i) { return _this.color(i); });
 
-	var resizeLines = this.utilityBars.append('g')
-		.attr('transform', 'translate(0,80)')
+	this.resizeLines = this.utilityBars.append('g')
+		.attr('transform', 'translate(0,' + _this.configuration.objectiveSpacing + ')')
 		.append('line')
 			.attr('x1', -5)
 			.attr('y1', function(d) { return d.lineY; })
@@ -101,11 +101,11 @@ ValueChart.prototype.plotChart = function() {
 			.style('stroke', 'red')
 			.style('stroke-width', 6);
 
-	resizeLines.call(d3.behavior.drag().on('drag', function(d, i) {
-		console.log(d, i);
 
-		console.log(d3.event.x, d3.event.y);
+			// Drag to Resize Weights Logic
+	this.resizeLines.call(d3.behavior.drag().on('drag', function(d, i) {
 
+		console.log(d);
 
     	_this.data[i+1].forEach(function(element) { 
 			element.weight= _this.bottomWeightScale(d3.event.y); 
@@ -113,16 +113,24 @@ ValueChart.prototype.plotChart = function() {
 
 		d.forEach(function(element) { 
 			element.weight =  _this.topWeightScale(d3.event.y); 
+			element.y = element.weight * element.value;
 			element.lineY = d3.event.y;
 		});
+
+		_this.stack(_this.data);
 
 		_this.utilityBars.data(_this.data)
 			.selectAll('.utilityGraphs')
 				.selectAll('rect')
-					.attr('height', function(d) { return _this.yScale(d.y * d.weight); })
-					.attr('y', function(d) { return (_this.configuration.objectiveSpacing + d.lineY) - _this.yScale(d.y * d.weight); })
+					.attr('height', function(d) { return d3.max([_this.yScale(d.value * d.weight),0]); })
+					.attr('y', function(d) { return (_this.configuration.objectiveSpacing + d.lineY) - _this.yScale(d.value * d.weight); })
 
-		resizeLines
+		_this.stackedBars.data(_this.data)
+			.selectAll('rect')
+    			.attr('height', function(d) { return d3.max([_this.stackedYScale(d.y0) - _this.stackedYScale(d.y0 + (d.y)), 0]);})
+    			.attr('y', function(d) { return _this.stackedYScale(d.y0 + d.y); });
+
+		_this.resizeLines
 			.attr('y1', function(d) { return d[0].lineY; })
 			.attr('y2', function(d) { return d[0].lineY; });
 
@@ -135,7 +143,7 @@ ValueChart.prototype.plotChart = function() {
 ValueChart.prototype.plotIndividualAlternatives = function() {
 	var _this = this;
 
-	var yMax = d3.max(this.data, function(layer) { return d3.max(layer, function(d) { return d.y; }); });
+	var yMax = d3.max(this.data, function(layer) { return d3.max(layer, function(d) { return d.value; }); });
 
 	this.yScale = d3.scale.linear()
     	.domain([0, 1])
@@ -146,9 +154,9 @@ ValueChart.prototype.plotIndividualAlternatives = function() {
 		.selectAll('rect')
 		.data(function(d) { return d; })
 		.enter().append('rect')
-			.attr('height', function(d) { return _this.yScale(d.y * d.weight); })
+			.attr('height', function(d) { return _this.yScale(d.value * d.weight); })
 			.attr('width', this.configuration.barWidth - 1)
-			.attr('y', function(d) { return _this.configuration.objectiveSpacing - _this.yScale(d.y * d.weight); })
+			.attr('y', function(d) { return _this.configuration.objectiveSpacing - _this.yScale(d.value * d.weight); })
 			.attr('x', function(d, i) { return (i * _this.configuration.barWidth); });
 
 	this.utilityCharts.selectAll('text')
@@ -164,19 +172,18 @@ ValueChart.prototype.plotIndividualAlternatives = function() {
 ValueChart.prototype.plotStackBarChart = function() {
 	var _this = this;
 
-	var stack = d3.layout.stack();
+	this.stack = d3.layout.stack();
+	this.stack.order('reverse');
 	
-	layersData = stack(this.data);
+	this.stack(this.data);
 
-	var yMax = d3.max(layersData, function(layer) { return d3.max(layer, function(d) { return d.y + d.y0; }); });
-
-    var yScale = d3.scale.linear()
+    this.stackedYScale = d3.scale.linear()
     	.domain([0, 1])
-    	.range([75, 0]);
+    	.range([75 * 6, 0]);
 
 
     this.stackedBars = this.stackedBarChart.selectAll('g')
-		.data(layersData)
+		.data(this.data)
 		.enter().append('g')
 		.style('fill', function(d, i) { return _this.color(i); });
 
@@ -185,7 +192,7 @@ ValueChart.prototype.plotStackBarChart = function() {
 		.enter().append('text')
 			.text(function(d) { return d; })
 			.attr('transform', "rotate(-90)")
-			.attr('x', this.configuration.textXOffset)
+			.attr('x', -400)
 			.attr('y', function(d, i) { return (i * _this.configuration.barWidth) + 15})
 			.attr('fill', 'black');
 
@@ -195,9 +202,9 @@ ValueChart.prototype.plotStackBarChart = function() {
 		.enter()
 		.append('rect')
 			.attr('x', function(d) { return d.x * _this.configuration.barWidth; })
-    		.attr('y', function(d) { return yScale(d.y0 + d.y); })
+    		.attr('y', function(d) { return _this.stackedYScale(d.y0 + d.y); })
     		.attr('width', this.configuration.barWidth - 1)
-    		.attr('height', function(d) { return yScale(d.y0) - yScale(d.y0 + d.y);});
+    		.attr('height', function(d) { return _this.stackedYScale(d.y0) - _this.stackedYScale(d.y0 + (d.y));});
 }
 
 
