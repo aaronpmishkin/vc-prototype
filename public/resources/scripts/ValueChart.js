@@ -2,7 +2,8 @@
 * @Author: aaronmishkin
 * @Date:   2016-05-05 14:14:04
 * @Last Modified by:   aaronpmishkin
-* @Last Modified time: 2016-05-17 10:04:23
+<<<<<<< HEAD
+* @Last Modified time: 2016-05-17 10:06:47
 */
 
 function ValueChart(dataLocation) {
